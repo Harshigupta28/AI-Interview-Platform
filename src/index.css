@@ -1,0 +1,106 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-display: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  
+  --color-dark-bg: #030303;
+  --color-dark-card: #0c0c0e;
+  --color-dark-border: #1f1f23;
+  
+  --color-accent-purple: #8B5CF6;
+  --color-accent-indigo: #6366F1;
+  --color-accent-cyan: #06B6D4;
+  --color-accent-pink: #EC4899;
+
+  --animate-pulse-slow: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  --animate-infinite-scroll: infinite-scroll 40s linear infinite;
+
+  @keyframes infinite-scroll {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+}
+
+/* Custom premium styling defaults */
+body {
+  background-color: #030303;
+  color: #f3f4f6;
+  font-family: var(--font-sans);
+  overflow-x: hidden;
+}
+
+/* Glassmorphism container helper */
+.glass-panel {
+  background: rgba(12, 12, 14, 0.6);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.glass-panel-hover {
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.glass-panel-hover:hover {
+  background: rgba(255, 255, 255, 0.03);
+  border-color: rgba(139, 92, 246, 0.3);
+  box-shadow: 0 0 30px rgba(139, 92, 246, 0.15);
+}
+
+/* Premium scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #030303;
+}
+::-webkit-scrollbar-thumb {
+  background: #1f1f23;
+  border-radius: 9999px;
+  border: 2px solid #030303;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #2d2d34;
+}
+
+/* Gradient text utility */
+.text-gradient {
+  background: linear-gradient(135deg, #ffffff 0%, #a3a3a3 50%, #525252 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.text-gradient-purple {
+  background: linear-gradient(135deg, #ffffff 20%, #c084fc 60%, #6366f1 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.text-gradient-cyan {
+  background: linear-gradient(135deg, #a5f3fc 0%, #06b6d4 50%, #0891b2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Radial light glow effects */
+.radial-glow {
+  background: radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.15), transparent 60%);
+}
+
+.radial-glow-pink {
+  background: radial-gradient(circle at 50% 50%, rgba(236, 72, 153, 0.1), transparent 60%);
+}
+
+.radial-glow-cyan {
+  background: radial-gradient(circle at 50% 50%, rgba(6, 182, 212, 0.1), transparent 60%);
+}
+
+/* Grid background pattern */
+.grid-bg {
+  background-size: 40px 40px;
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+}
