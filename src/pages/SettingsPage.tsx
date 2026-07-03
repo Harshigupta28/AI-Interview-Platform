@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Lock, 
   Shield, 
@@ -6,13 +6,18 @@ import {
   Globe, 
   Palette, 
   Link as LinkIcon, 
-  CheckCircle2
+  CheckCircle2,
+  User as UserIcon
 } from 'lucide-react';
 import { DashboardLayout } from '../components/DashboardLayout';
 import { GlassCard } from '../components/GlassCard';
+import { useAuth } from '../context/AuthContext';
 
 export const SettingsPage: React.FC = () => {
+  const { user, updateUser } = useAuth();
+
   // Mock states
+  const [fullName, setFullName] = useState('');
   const [language, setLanguage] = useState('en');
   const [theme, setTheme] = useState('dark');
   const [emailAlerts, setEmailAlerts] = useState(true);
@@ -25,6 +30,14 @@ export const SettingsPage: React.FC = () => {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [passwordSuccess, setPasswordSuccess] = useState('');
+  const [profileSuccess, setProfileSuccess] = useState('');
+
+  // Prepopulate fullName from context
+  useEffect(() => {
+    if (user) {
+      setFullName(user.fullName);
+    }
+  }, [user]);
 
   // Connected accounts
   const [connections, setConnections] = useState({
@@ -32,6 +45,21 @@ export const SettingsPage: React.FC = () => {
     github: true,
     linkedin: false,
   });
+
+  const handleProfileSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!fullName.trim()) {
+      alert("Name cannot be empty.");
+      return;
+    }
+    try {
+      await updateUser(fullName);
+      setProfileSuccess("Profile details saved successfully!");
+      setTimeout(() => setProfileSuccess(''), 2500);
+    } catch (err: any) {
+      alert(err.message || "Failed to update profile details");
+    }
+  };
 
   const handlePasswordSave = (e: React.FormEvent) => {
     e.preventDefault();
@@ -73,15 +101,63 @@ export const SettingsPage: React.FC = () => {
         <div>
           <h2 className="text-xl font-bold font-display text-white">System Settings</h2>
           <p className="text-xs text-neutral-400 font-light mt-1">
-            Manage account attributes, notification thresholds, credentials, and linked accounts.
+            Manage account attributes, credentials, and profile settings.
           </p>
         </div>
 
         {/* 1. Account Settings & Locale */}
         <GlassCard className="p-6 border-white/5 text-left" hoverGlow={false}>
           <div className="flex items-center gap-3 pb-3 border-b border-white/5 mb-5">
-            <Globe className="h-5 w-5 text-accent-purple" />
-            <h3 className="text-sm font-semibold text-white uppercase tracking-wider">Account & Language</h3>
+            <UserIcon className="h-5 w-5 text-accent-purple" />
+            <h3 className="text-sm font-semibold text-white uppercase tracking-wider">Candidate Profile</h3>
+          </div>
+
+          {profileSuccess && (
+            <div className="mb-4 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs text-emerald-400 flex items-center gap-2">
+              <CheckCircle2 className="h-4 w-4" />
+              {profileSuccess}
+            </div>
+          )}
+
+          <form onSubmit={handleProfileSave} className="space-y-4 text-xs">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <label className="font-semibold text-neutral-300">Full Name</label>
+                <input 
+                  type="text"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg bg-neutral-900 border border-white/10 focus:border-accent-purple outline-none text-white"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="font-semibold text-neutral-300">Email Address (Read-only)</label>
+                <input 
+                  type="email"
+                  value={user?.email || ''}
+                  disabled
+                  className="w-full px-3 py-2 rounded-lg bg-neutral-900 border border-white/5 text-neutral-500 cursor-not-allowed"
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end pt-2">
+              <button 
+                type="submit"
+                className="px-6 py-2.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-accent-purple to-accent-indigo hover:scale-[1.02] transition-all cursor-pointer"
+              >
+                Save Profile Parameters
+              </button>
+            </div>
+          </form>
+        </GlassCard>
+
+        {/* 2. System Language */}
+        <GlassCard className="p-6 border-white/5 text-left" hoverGlow={false}>
+          <div className="flex items-center gap-3 pb-3 border-b border-white/5 mb-5">
+            <Globe className="h-5 w-5 text-accent-cyan" />
+            <h3 className="text-sm font-semibold text-white uppercase tracking-wider">Account Locale</h3>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-xs">
@@ -108,15 +184,14 @@ export const SettingsPage: React.FC = () => {
           </div>
         </GlassCard>
 
-        {/* 2. Theme & Notifications */}
+        {/* 3. Theme & Notifications */}
         <GlassCard className="p-6 border-white/5 text-left" hoverGlow={false}>
           <div className="flex items-center gap-3 pb-3 border-b border-white/5 mb-5">
-            <Palette className="h-5 w-5 text-accent-cyan" />
+            <Palette className="h-5 w-5 text-accent-pink" />
             <h3 className="text-sm font-semibold text-white uppercase tracking-wider">Design & Notifications</h3>
           </div>
 
           <div className="space-y-6 text-xs">
-            {/* Theme selector */}
             <div className="space-y-2">
               <label className="font-semibold text-neutral-300">Interface Theme</label>
               <div className="flex gap-3">
@@ -139,7 +214,6 @@ export const SettingsPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Notification switches */}
             <div className="space-y-3 pt-2">
               <label className="font-semibold text-neutral-300">Email Reports</label>
               
@@ -174,10 +248,10 @@ export const SettingsPage: React.FC = () => {
           </div>
         </GlassCard>
 
-        {/* 3. Privacy & Security */}
+        {/* 4. Privacy & Security */}
         <GlassCard className="p-6 border-white/5 text-left" hoverGlow={false}>
           <div className="flex items-center gap-3 pb-3 border-b border-white/5 mb-5">
-            <Shield className="h-5 w-5 text-accent-pink" />
+            <Shield className="h-5 w-5 text-yellow-500" />
             <h3 className="text-sm font-semibold text-white uppercase tracking-wider">Privacy & Security</h3>
           </div>
 
@@ -212,10 +286,10 @@ export const SettingsPage: React.FC = () => {
           </div>
         </GlassCard>
 
-        {/* 4. Connected Accounts */}
+        {/* 5. Connected Accounts */}
         <GlassCard className="p-6 border-white/5 text-left" hoverGlow={false}>
           <div className="flex items-center gap-3 pb-3 border-b border-white/5 mb-5">
-            <LinkIcon className="h-5 w-5 text-yellow-500" />
+            <LinkIcon className="h-5 w-5 text-accent-purple" />
             <h3 className="text-sm font-semibold text-white uppercase tracking-wider">Linked Credentials</h3>
           </div>
 
@@ -228,7 +302,7 @@ export const SettingsPage: React.FC = () => {
                 </div>
                 <div>
                   <p className="font-semibold text-white">Google Accounts</p>
-                  <p className="text-[9px] text-neutral-500">Linked to alex.mercer@gmail.com</p>
+                  <p className="text-[9px] text-neutral-500">Linked to {user?.email}</p>
                 </div>
               </div>
               <button 
@@ -249,7 +323,7 @@ export const SettingsPage: React.FC = () => {
                 </div>
                 <div>
                   <p className="font-semibold text-white">GitHub Profiles</p>
-                  <p className="text-[9px] text-neutral-500">Linked to alex-dev</p>
+                  <p className="text-[9px] text-neutral-500">Linked to candidate-dev</p>
                 </div>
               </div>
               <button 
@@ -261,31 +335,10 @@ export const SettingsPage: React.FC = () => {
                 {connections.github ? 'Unlink' : 'Link'}
               </button>
             </div>
-
-            {/* LinkedIn */}
-            <div className="flex justify-between items-center p-3 rounded-xl border border-white/5 bg-white/2">
-              <div className="flex items-center gap-3">
-                <div className="h-8 w-8 rounded-lg bg-neutral-900 border border-white/10 flex items-center justify-center font-bold text-xs text-neutral-400">
-                  IN
-                </div>
-                <div>
-                  <p className="font-semibold text-white">LinkedIn Profiles</p>
-                  <p className="text-[9px] text-neutral-500">Link profile to showcase grades</p>
-                </div>
-              </div>
-              <button 
-                onClick={() => toggleConnection('linkedin')}
-                className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider border cursor-pointer transition-all ${
-                  connections.linkedin ? 'bg-white/5 border-white/10 text-neutral-400 hover:text-white' : 'bg-accent-purple/10 border-accent-purple/20 text-accent-purple'
-                }`}
-              >
-                {connections.linkedin ? 'Unlink' : 'Link'}
-              </button>
-            </div>
           </div>
         </GlassCard>
 
-        {/* 5. Change Password UI */}
+        {/* 6. Change Password UI */}
         <GlassCard className="p-6 border-white/5 text-left" hoverGlow={false}>
           <div className="flex items-center gap-3 pb-3 border-b border-white/5 mb-5">
             <Lock className="h-5 w-5 text-emerald-400" />
@@ -346,7 +399,7 @@ export const SettingsPage: React.FC = () => {
           </form>
         </GlassCard>
 
-        {/* 6. Danger Zone (Delete account section) */}
+        {/* 7. Danger Zone (Delete account section) */}
         <GlassCard className="p-6 border-red-500/10 bg-red-500/[0.01] text-left" hoverGlow={false}>
           <div className="flex items-center gap-3 pb-3 border-b border-red-500/10 mb-5">
             <Trash2 className="h-5 w-5 text-red-500 animate-pulse" />

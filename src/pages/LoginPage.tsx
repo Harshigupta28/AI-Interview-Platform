@@ -13,6 +13,7 @@ import {
   CheckCircle2
 } from 'lucide-react';
 import { GlassCard } from '../components/GlassCard';
+import { useAuth } from '../context/AuthContext';
 
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
@@ -43,21 +44,26 @@ export const LoginPage: React.FC = () => {
     return Object.keys(tempErrors).length === 0;
   };
 
-  const handleLogin = (e: React.FormEvent) => {
+  const { login } = useAuth();
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (validate()) {
       setIsLoading(true);
       setSuccessMsg('');
+      setErrors({});
       
-      // Simulate API verification
-      setTimeout(() => {
-        setIsLoading(false);
+      try {
+        await login(email, password);
         setSuccessMsg('Authentication successful! Redirecting...');
-        
         setTimeout(() => {
           navigate('/dashboard');
-        }, 1500);
-      }, 1500);
+        }, 1200);
+      } catch (error: any) {
+        setErrors({ email: error.message || 'Login failed. Please check your credentials.' });
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 

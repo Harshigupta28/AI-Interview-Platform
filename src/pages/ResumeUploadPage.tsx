@@ -13,6 +13,8 @@ import {
 } from 'lucide-react';
 import { DashboardLayout } from '../components/DashboardLayout';
 import { GlassCard } from '../components/GlassCard';
+import { useAuth } from '../context/AuthContext';
+import api from '../utils/api';
 
 export const ResumeUploadPage: React.FC = () => {
   const navigate = useNavigate();
@@ -57,45 +59,59 @@ export const ResumeUploadPage: React.FC = () => {
     fileInputRef.current?.click();
   };
 
-  const processFile = (file: File) => {
+  const { setUserResume } = useAuth();
+
+  const processFile = async (selectedFile: File) => {
     // Validate type (mock PDF/DOCX)
-    if (!file.name.endsWith('.pdf') && !file.name.endsWith('.docx')) {
+    if (!selectedFile.name.endsWith('.pdf') && !selectedFile.name.endsWith('.docx')) {
       alert('Unsupported file format. Please upload a PDF or DOCX file.');
       return;
     }
 
-    setFile(file);
+    setFile(selectedFile);
     setUploadState('uploading');
     setParseProgress(0);
     setParseLog('Initializing parser...');
 
-    // Simulate Parsing Pipeline steps
-    const logs = [
-      'Extracting text streams...',
-      'Categorizing core programming models...',
-      'Mapping resume elements to software engineering framework tracks...',
-      'Running AI semantic gap checks against top job profiles...',
-      'Parsing complete.'
-    ];
+    // Trigger upload
+    const formData = new FormData();
+    formData.append("resume", selectedFile);
 
-    let currentLogIndex = 0;
-    const interval = setInterval(() => {
-      setParseProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          setUploadState('parsed');
-          return 100;
-        }
-        
-        // Log changes at specific percentages
-        if (prev % 20 === 0 && currentLogIndex < logs.length) {
-          setParseLog(logs[currentLogIndex]);
-          currentLogIndex++;
-        }
+    try {
+      const data: any = await api.post("/users/resume", formData);
+      setUserResume(data.resumeUrl);
 
-        return prev + 10;
-      });
-    }, 250);
+      // Simulate Parsing Pipeline steps visually
+      const logs = [
+        'Extracting text streams...',
+        'Categorizing programming elements...',
+        'Matching resume parameters to standard engineering frameworks...',
+        'Running AI comparative audits...',
+        'Parsing complete.'
+      ];
+
+      let currentLogIndex = 0;
+      const interval = setInterval(() => {
+        setParseProgress((prev) => {
+          if (prev >= 100) {
+            clearInterval(interval);
+            setUploadState('parsed');
+            return 100;
+          }
+          
+          if (prev % 20 === 0 && currentLogIndex < logs.length) {
+            setParseLog(logs[currentLogIndex]);
+            currentLogIndex++;
+          }
+
+          return prev + 10;
+        });
+      }, 250);
+
+    } catch (err: any) {
+      alert(err.message || "Failed to upload resume to the server");
+      setUploadState('idle');
+    }
   };
 
   const resetUpload = () => {

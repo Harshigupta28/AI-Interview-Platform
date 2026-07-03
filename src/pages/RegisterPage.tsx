@@ -16,6 +16,7 @@ import {
   ShieldCheck
 } from 'lucide-react';
 import { GlassCard } from '../components/GlassCard';
+import { useAuth } from '../context/AuthContext';
 
 export const RegisterPage: React.FC = () => {
   const navigate = useNavigate();
@@ -107,21 +108,26 @@ export const RegisterPage: React.FC = () => {
     return Object.keys(tempErrors).length === 0;
   };
 
-  const handleRegister = (e: React.FormEvent) => {
+  const { register } = useAuth();
+
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     if (validate()) {
       setIsLoading(true);
       setSuccessMsg('');
+      setErrors({});
       
-      // Simulate Register Verification
-      setTimeout(() => {
-        setIsLoading(false);
+      try {
+        await register(fullName, email, password);
         setSuccessMsg('Account created successfully! Preparing dashboard...');
-        
         setTimeout(() => {
           navigate('/dashboard');
-        }, 1500);
-      }, 1500);
+        }, 1200);
+      } catch (error: any) {
+        setErrors({ email: error.message || 'Registration failed. Please try again.' });
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 

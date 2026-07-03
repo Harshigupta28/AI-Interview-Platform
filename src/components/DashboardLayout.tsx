@@ -15,6 +15,7 @@ import {
   Plus, 
   ChevronDown 
 } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -24,9 +25,21 @@ interface DashboardLayoutProps {
 export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, pageTitle }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
+
+  const getInitials = (name: string) => {
+    if (!name) return "AM";
+    const parts = name.split(" ");
+    return parts.map(p => p[0]).join("").toUpperCase().substring(0, 2);
+  };
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
 
   const menuItems = [
     { name: 'Dashboard', icon: <LayoutDashboard className="h-4 w-4" />, path: '/dashboard' },
@@ -82,8 +95,8 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, page
         {/* Logout Section */}
         <div className="p-4 border-t border-white/5">
           <button
-            onClick={() => navigate('/')}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold tracking-wide text-neutral-400 hover:text-red-400 hover:bg-red-500/5 transition-all"
+            onClick={handleLogout}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold tracking-wide text-neutral-400 hover:text-red-400 hover:bg-red-500/5 transition-all cursor-pointer"
           >
             <LogOut className="h-4 w-4" />
             Logout
@@ -142,9 +155,9 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, page
           <button
             onClick={() => {
               setMobileMenuOpen(false);
-              navigate('/');
+              handleLogout();
             }}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold text-neutral-400 hover:text-red-400 hover:bg-red-500/5 transition-all"
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold text-neutral-400 hover:text-red-400 hover:bg-red-500/5 transition-all cursor-pointer"
           >
             <LogOut className="h-4 w-4" />
             Logout
@@ -227,37 +240,37 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, page
                 }}
                 className="flex items-center gap-2 p-1 rounded-lg hover:bg-white/3 transition-all cursor-pointer border border-transparent hover:border-white/5"
               >
-                <div className="h-7 w-7 rounded-full bg-gradient-to-tr from-accent-purple to-accent-indigo flex items-center justify-center font-bold text-xs">
-                  AM
+                <div className="h-7 w-7 rounded-full bg-gradient-to-tr from-accent-purple to-accent-indigo flex items-center justify-center font-bold text-xs text-white">
+                  {getInitials(user?.fullName || "Alex Mercer")}
                 </div>
                 <ChevronDown className="h-3.5 w-3.5 text-neutral-400 hidden sm:block" />
               </button>
 
-              {/* Mock Profile Dropdown */}
+              {/* Profile Dropdown */}
               {showProfileMenu && (
                 <>
                   <div className="fixed inset-0 z-30" onClick={() => setShowProfileMenu(false)} />
                   <div className="absolute right-0 mt-2 w-48 rounded-xl border border-white/10 bg-dark-card p-2 shadow-2xl z-40 text-left">
                     <div className="px-3 py-2 border-b border-white/5">
-                      <p className="text-xs font-semibold text-white">Alex Mercer</p>
-                      <p className="text-[9px] text-neutral-500">Software Track</p>
+                      <p className="text-xs font-semibold text-white">{user?.fullName || "Alex Mercer"}</p>
+                      <p className="text-[9px] text-neutral-500 uppercase tracking-wider">{user?.role || "Student"}</p>
                     </div>
                     <div className="p-1 space-y-0.5">
                       <button 
                         onClick={() => { setShowProfileMenu(false); navigate('/profile'); }}
-                        className="w-full text-left px-3 py-2 rounded-lg text-[10px] text-neutral-300 hover:text-white hover:bg-white/5 font-semibold transition-all"
+                        className="w-full text-left px-3 py-2 rounded-lg text-[10px] text-neutral-300 hover:text-white hover:bg-white/5 font-semibold transition-all cursor-pointer"
                       >
                         My Profile
                       </button>
                       <button 
                         onClick={() => { setShowProfileMenu(false); navigate('/settings'); }}
-                        className="w-full text-left px-3 py-2 rounded-lg text-[10px] text-neutral-300 hover:text-white hover:bg-white/5 font-semibold transition-all"
+                        className="w-full text-left px-3 py-2 rounded-lg text-[10px] text-neutral-300 hover:text-white hover:bg-white/5 font-semibold transition-all cursor-pointer"
                       >
                         Preferences
                       </button>
                       <button 
-                        onClick={() => { setShowProfileMenu(false); navigate('/'); }}
-                        className="w-full text-left px-3 py-2 rounded-lg text-[10px] text-red-400 hover:text-red-300 hover:bg-red-500/5 font-semibold transition-all"
+                        onClick={() => { setShowProfileMenu(false); handleLogout(); }}
+                        className="w-full text-left px-3 py-2 rounded-lg text-[10px] text-red-400 hover:text-red-300 hover:bg-red-500/5 font-semibold transition-all cursor-pointer"
                       >
                         Sign Out
                       </button>
